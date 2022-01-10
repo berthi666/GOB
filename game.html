@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of beans</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <style>
+        canvas{background-color: rgba(0, 0, 0, 0.8);}
+    </style>
+    <script>
+        let KEY_SPACE = false; //32
+        let KEY_UP = false; //38
+        let KEY_DOWN = false; //40
+        let canvas;
+        let ctx ;
+        let backgroundImage = new Image();
+        let shit = new Image();
+        let shotfired =false;
+        let hitcounter = 0;
+        let ufoIntervalCount = 0;
+        const CWIDTH = 1280;
+        const CHEIGHT = 800; 
+        let level = 1;
+
+
+        let levels = [{}];
+
+
+
+        let flyObjects = [{
+            x: 0,
+            y: 00,
+            width:100,
+            height:40,
+            lifes:1,
+            power:1,
+            speed:5,
+            src: 'img/cup1.png',
+            appsound : 'sounds/UfoAppear.wav',
+            hitsound : 'sounds/ufoHit.wav',
+            destsound: 'sounds/ufoDestroy.ogg'},
+            
+            { x: 0,
+            y: 00,
+            width:100,
+            height:40,
+            lifes:1,
+            power:1,
+            speed:7,
+            src: 'img/cup2.png',
+            appsound : 'sounds/UfoAppear.wav',
+            hitsound : 'sounds/ufoHit.wav',
+            destsound: 'sounds/ufoDestroy.ogg'},
+            {x: 0,
+            y: 00,
+            width:100,
+            height:80,
+            lifes:1,
+            power:1,
+            speed:4,
+            src: 'img/mug2.png',
+            appsound : 'sounds/UfoAppear.wav',
+            hitsound : 'sounds/ufoHit.wav',
+            destsound: 'sounds/ufoDestroy.ogg'},
+            {x: 0,
+            y: 00,
+            width:100,
+            height:80,
+            lifes:1,
+            power:2,
+            speed:4,
+            src: 'img/mug1.png',
+            appsound : 'sounds/UfoAppear.wav',
+            hitsound : 'sounds/ufoHit.wav',
+            destsound: 'sounds/ufoDestroy.ogg'}
+        ];
+
+        let rocket={
+            x:10,
+            y:CHEIGHT/2-50/2,
+            width:100,
+            height:80,
+            lifes:2,
+            shield:1,
+            power:1,
+            shotsound: 'sounds/zap2.flac',
+            src: 'img/ship.png'
+        };
+        let ufos=[];
+        let shots = [];
+
+
+
+        window.addEventListener ("load", function(){
+            if (document.getElementById("GameStart")) {
+                document.getElementById("GameStart").addEventListener("click", startGame);
+
+            }
+            });
+
+
+        
+        document.onkeydown = function(e){
+            if (e.keyCode==32){KEY_SPACE=true;} //Leertaste gedrückt
+            if (e.keyCode==38){KEY_UP=true;} //Pfeil Up gedrückt
+            if (e.keyCode==40){KEY_DOWN=true;} //Pfeil Down gedrückt
+        }
+        document.onkeyup = function(e){
+            if (e.keyCode==32){KEY_SPACE=false;} //Leertaste losgelassen
+            if (e.keyCode==38){KEY_UP=false;} //Pfeil Up losgelassen
+            if (e.keyCode==40){KEY_DOWN=false;} //Pfeil Down losgelassen
+        }
+
+        function startGame(){
+
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            document.getElementById("GameStart").style.visibility = 'hidden';
+            playsound('sounds/backgroundsound.mp3', 0.75);
+
+            loadImages();
+            //console.log("lives " + rocket.lifes);
+           
+            setInterval(update, 1000/50 );
+            setInterval(shooting, 1000/50 );
+            setInterval(createUfos,1000/20 );
+            setInterval(checkColision, 10);
+
+            
+                
+            
+            draw();
+
+            //calc
+        }
+        
+        
+        function checkColision(){
+            ufos.forEach(function(ufo){
+                        
+                if (collision(rocket, ufo)){
+                    console.log("rocketHitUfo ")
+                   rocket.lifes -= ufo.power;
+                   ufo.power -= rocket.shield;
+                   playsound('sounds/ShipHit.wav', 1);
+                    if (rocket.lifes <=0){
+                        rocket.img.src = 'img/shit.png';
+                        playsound('sounds/ShipDestroyed.mp3', 1);
+                          
+                    };
+                    
+                    if ( ufo.power <=0){ufos = ufos.filter(u=> u !=ufo);};
+                    
+                };
+                shots.forEach(function(shot){
+                    if (collision(ufo,shot)){
+                        console.log("shotHitUfo ")   
+                        ufo.lifes -= 1;
+                        playsound(ufo.hitsound, 1);
+                        hitcounter += 1;
+                        ufos = ufos.filter(u=> u !=ufo);   
+                        shot.power -= 1;
+                        if (ufo.lifes <= 0){
+                            playsound(ufo.destsound, 1);
+                            ufos = ufos.filter(u=> u != ufo);};
+                        
+                             // cause damage to UFO
+                            
+                        if (shot.power <= 0){shots.filter(i=> i != shot);};  // deduct power from shot 
+                        
+                    };
+                })
+            })
+            
+            console.log("hitcounter " + hitcounter     ) 
+        }
+
+        function update(){
+            if (rocket.lifes>0){
+            
+                if (KEY_UP &&  (rocket.y > 0)){
+                    rocket.y -= 7;
+                };
+                if (KEY_DOWN && (rocket.y < CHEIGHT-rocket.height)){
+                    rocket.y += 7;
+                };   
+
+                shots.forEach(function(shot){
+                    shot.x +=15;
+                    if (shot.x > CWIDTH){shots.filter(u=> u !=shot);}; 
+                })
+
+                ufos.forEach(function(ufo){
+                    ufo.x -= ufo.speed;
+                    if (ufo.x <= - ufo.width){ufos = ufos.filter(u=> u !=ufo);};              
+                });
+
+                
+
+                
+            return null;}
+        }
+
+        function createUfos(){//call every 50 milliseconds   
+            if (rocket.lifes>0){
+                if (ufos.length == 0 ){ufoInterval = 1};
+                if (ufos.length != 0 ){ufoInterval = 30 - getRandomInt(level * 2*10) };
+                //console.log("ufoIntervall " + ufoInterval);
+                //console.log("ufos count " + ufos.length);
+                ufoIntervalCount += 1;
+
+                if (ufoIntervalCount>=ufoInterval){
+                    ufoIntervalCount = 0;
+                    
+                    let ufoType = getRandomInt(4);
+                    let ufo ={
+                        x : CWIDTH + flyObjects[ufoType].width,
+                        y : getRandomInt(CHEIGHT) ,
+                        width : flyObjects[ufoType].width,
+                        height : flyObjects[ufoType].height,
+                        lifes : flyObjects[ufoType].lifes,
+                        power : flyObjects[ufoType].power,
+                        speed : flyObjects[ufoType].speed * (1 + getRandomInt(0.2)),
+                        src : flyObjects[ufoType].src,
+                        appsound : flyObjects[ufoType].appsound,
+                        destsound: flyObjects[ufoType].destsound,
+                        hitsound : flyObjects[ufoType].hitsound,
+                        img: new Image()
+                    };
+                    //console.log("ufoType: "+ufoType+" speed " + ufo.speed);
+
+                    ufo.img.src = ufo.src; 
+                    playsound(ufo.appsound, 0.3);
+                    ufos.push(ufo); // ufo erzeugen
+                };
+            return null;}
+        }
+        function shooting(){
+            let shot = {
+            x:rocket.x+rocket.width,
+            y:rocket.y+(rocket.height/2),
+            width:10,
+            height:6,
+            lifes:1,
+            power : rocket.power,
+            shotsound : rocket.shotsound,
+            src: 'img/zap.png',
+            img: new Image()
+            };
+
+
+            if (KEY_SPACE  && !shotfired){
+                shot.img.src=shot.src;
+                shots.push(shot);
+                playsound(shot.shotsound, 0.75);
+              };      
+            shotfired = KEY_SPACE;
+            };
+
+        function loadImages(){
+            backgroundImage.src='img/background.png';
+            
+            rocket.img=new Image();
+            rocket.img.src=rocket.src;
+        }
+
+        function collision(o1, o2){
+            return  (o1.x + o1.width > o2.x) &&
+            (o1.y + o1.height > o2.y) &&
+            (o1.x < o2.x + o2.width) && 
+            (o1.y < o2.y + o2.height);
+
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        function playsound(sound, volume){
+            var audio = new Audio(sound);
+
+            audio.volume = volume;
+            audio.play();}
+        function draw(){
+            ctx.drawImage(backgroundImage, 0, 0, CWIDTH,CHEIGHT);
+            ctx.drawImage(rocket.img, rocket.x, rocket.y, rocket.width, rocket.height);
+
+            ufos.forEach(function(ufo){
+                ctx.drawImage(ufo.img, ufo.x, ufo.y, ufo.width, ufo.height);   
+            });
+            shots.forEach(function(shot){
+                ctx.drawImage(shot.img, shot.x, shot.y, shot.width*10, shot.height*10)
+            });
+            requestAnimationFrame(draw);
+        }
+
+    </script>
+</head>
+<body > <!--onload="startGame()">-->
+    
+
+    <button type="button" id = "GameStart" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+        StartGame
+      </button>
+
+    <canvas id="canvas" width="1200" height="800"></canvas>
+
+    <table class="mdl-data-table mdl-js-data-table mdl-data-table- mdl-shadow--0dp">
+        <thead>
+          <tr>
+            <th>Life</th>
+            <th>Shield</th>
+            <th>Hits</th>
+            <th>Level</th>
+            <th>Hits to next Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td >level</td>
+            <td>25</td>
+            <td>$2.90</td>
+          </tr>
+          
+        </tbody>
+      </table>
+
+</body>
+</html>
