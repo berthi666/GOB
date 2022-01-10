@@ -1,1 +1,1 @@
-# GOB
+# Game Of Beans
