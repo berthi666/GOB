@@ -8,14 +8,24 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    </script>
 
     <style>
         canvas{background-color: rgba(0, 0, 0, 0.8);}
+        #highscore {float: right; }
     </style>
-    <script>
-        let KEY_SPACE = false; //32
+    <script> /* type="text/javascript" src='game.js'>*/
+    
+       
+    let KEY_SPACE = false; //32
         let KEY_UP = false; //38
         let KEY_DOWN = false; //40
+        let KEY_B = false; //66
+        let KEY_F = false; // 70
+        let KEY_S = false; // 83
+        
+        let KEY_Q = false; // 81
         let canvas;
         let ctx ;
         let backgroundImage = new Image();
@@ -25,14 +35,113 @@
         let ufoIntervalCount = 0;
         const CWIDTH = 1280;
         const CHEIGHT = 800; 
-        let level = 1;
+        let Fpressed = false, Spressed = false;
+        let level = 0;  
+        let endbossspeed = 0 ;
+        let createEB = false;
+        let eb = 0; 
+        let randEBshot=[];
+        let scoreadd ={
+            score:0,
+            time:0
+                };
 
 
-        let levels = [{}];
+        let gameInfo = [{text:'Level',
+            time:3000,
+            rem:0,
+            fillColor : 'red',
+            borderColor : 'yellow',
+            font : '500px Arial bold',
+            horizontAlign : 'left',
+            textBaseline : 'middle',
+            x:0,
+            y:0}];
+
+        let guns = [
+            {name:"main",
+            power:1,
+            speed: 15,
+            width: 10,
+            height: 6,
+            pwidth:80,
+            pheight:40,
+            shotsound: 'sounds/zap2.mp3',
+            src: 'img/zap1.png'},
+
+            {name:"blast",
+            power:50, 
+            speed: 10,
+            width: 10,
+            height: 800, 
+            pwidth:500,
+            pheight:300,
+            shotsound: 'sounds/superzap.mp3',
+            src: 'img/zap2.png'},
+            
+            {name:"bean",
+            power:1,
+            speed: -12,
+            width: 10,
+            height: 6,
+            pwidth:40,
+            pheight:40,
+            shotsound: 'sounds/bean.mp3',
+            src: 'img/bean.png'}
+        ];
+
+        let levels = [
+
+            {lifeadd:0,
+            shieldadd:0,
+            poweradd:0,
+            backgr: 'img/background.png',
+            hitsrequired:00,
+            eb:0,
+            ebcount : 0,
+            src: 'img/ship1.png'},
+
+            {lifeadd:0,
+            shieldadd:0,
+            poweradd:0,
+            backgr: 'img/background.png',
+            hitsrequired:50,
+            eb:6,
+            ebcount : 1,
+            src: 'img/ship1.png'},
+
+            {lifeadd:1,
+            shieldadd:1,
+            poweradd:1,
+            backgr: 'img/background.png',
+            hitsrequired:100,
+            eb:6,
+            ebcount : 1,
+            src: 'img/ship2.png'},
+
+            {lifeadd:0,
+            shieldadd:0,
+            poweradd:0,
+            backgr: 'img/background.png',
+            hitsrequired:200,
+            eb:6,
+            ebcount : 1,
+            src: 'img/ship2.png'},
+
+            {lifeadd:0,
+            shieldadd:0,
+            poweradd:0,
+            backgr: 'img/background.png',
+            hitsrequired:10000,
+            eb:6,
+            ebcount : 1,
+            src: 'img/ship2.png'}];
 
 
-
+            const MAXOBJ = 5;
         let flyObjects = [{
+            //0
+            type:'ufo',
             x: 0,
             y: 00,
             width:100,
@@ -40,44 +149,95 @@
             lifes:1,
             power:1,
             speed:5,
+            points:1,
             src: 'img/cup1.png',
-            appsound : 'sounds/UfoAppear.wav',
-            hitsound : 'sounds/ufoHit.wav',
-            destsound: 'sounds/ufoDestroy.ogg'},
-            
-            { x: 0,
+            appsound : 'sounds/UfoAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/ufoDestroy.mp3'},
+            //1
+            { type:'ufo',
+            x: 0,
             y: 00,
             width:100,
             height:40,
-            lifes:1,
+            lifes:2,
             power:1,
-            speed:7,
+            speed:8,
+            points:2,
             src: 'img/cup2.png',
-            appsound : 'sounds/UfoAppear.wav',
-            hitsound : 'sounds/ufoHit.wav',
-            destsound: 'sounds/ufoDestroy.ogg'},
-            {x: 0,
+            appsound : 'sounds/UfoAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/ufoDestroy.mp3'},
+            //2
+            {type:'ufo',
+            x: 0,
             y: 00,
             width:100,
             height:80,
-            lifes:1,
-            power:1,
+            lifes:2,
+            power:2,
             speed:4,
+            points:5,
             src: 'img/mug2.png',
-            appsound : 'sounds/UfoAppear.wav',
-            hitsound : 'sounds/ufoHit.wav',
-            destsound: 'sounds/ufoDestroy.ogg'},
-            {x: 0,
+            appsound : 'sounds/UfoAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/ufoDestroy.mp3'},
+            //3
+            {type:'ufo',
+            x: 0,
+            y: 00,
+            width:100,
+            height:80,
+            lifes:3,
+            power:2,
+            speed:4,
+            points:7,
+            src: 'img/mug1.png',
+            appsound : 'sounds/UfoAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/ufoDestroy.mp3'},
+            //4
+            {type:'powerup',
+            x: 0,
             y: 00,
             width:100,
             height:80,
             lifes:1,
             power:2,
             speed:4,
-            src: 'img/mug1.png',
-            appsound : 'sounds/UfoAppear.wav',
-            hitsound : 'sounds/ufoHit.wav',
-            destsound: 'sounds/ufoDestroy.ogg'}
+            points:15,
+            src: 'img/sugar.png',
+            appsound : 'sounds/powerupAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/powerup.mp3'},
+            //5
+            {type:'powerup',
+            x: 0,
+            y: 00,
+            width:100,
+            height:80,
+            lifes:1,
+            power:2,
+            speed:4,
+            points:20,
+            src: 'img/shield.png',
+            appsound : 'sounds/powerupAppear.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'powerup.mp3'},
+            //6
+            {type:'endboss',
+            x: 0,
+            y: 00,
+            width:200,
+            height:200,
+            lifes:15,
+            power:2,
+            speed:4,
+            points:20,
+            src: 'img/can.png',
+            appsound : 'sounds/endboss.mp3',
+            hitsound : 'sounds/ufoHit.mp3',
+            destsound: 'sounds/endbossDest.mp3'}
         ];
 
         let rocket={
@@ -85,11 +245,15 @@
             y:CHEIGHT/2-50/2,
             width:100,
             height:80,
+            speed:7,
             lifes:2,
             shield:1,
-            power:1,
-            shotsound: 'sounds/zap2.flac',
-            src: 'img/ship.png'
+            poweradd:0,
+            gun1:guns[0],
+            gun2:guns[0],
+            level: 1,
+            src: '',
+            img: new Image()
         };
         let ufos=[];
         let shots = [];
@@ -97,38 +261,63 @@
 
 
         window.addEventListener ("load", function(){
-            if (document.getElementById("GameStart")) {
-                document.getElementById("GameStart").addEventListener("click", startGame);
+                if (document.getElementById("GameStart")) {
+                    document.getElementById("GameStart").addEventListener("click", startGame);
 
-            }
+                }
+                /*if (document.getElementById("shipfaster")) {
+                    document.getElementById("shipfaster").addEventListener("click", adjustSpeed(1));
+                }
+                if (document.getElementById("shipslower")) {
+                    document.getElementById("shipslower").addEventListener("click", adjustSpeed(-1));
+                }*/
             });
 
 
         
         document.onkeydown = function(e){
+            console.log("key: " + e.keyCode);
             if (e.keyCode==32){KEY_SPACE=true;} //Leertaste gedrückt
             if (e.keyCode==38){KEY_UP=true;} //Pfeil Up gedrückt
             if (e.keyCode==40){KEY_DOWN=true;} //Pfeil Down gedrückt
+            if (e.keyCode==66){KEY_B=true;} //B gedrückt
+            if (e.keyCode==70){KEY_F=true;} //F gedrückt
+            if (e.keyCode==83){KEY_S=true;} //S gedrückt
+            if (e.keyCode==81){KEY_Q=true;} //Q gedrückt
+
         }
         document.onkeyup = function(e){
+
             if (e.keyCode==32){KEY_SPACE=false;} //Leertaste losgelassen
             if (e.keyCode==38){KEY_UP=false;} //Pfeil Up losgelassen
             if (e.keyCode==40){KEY_DOWN=false;} //Pfeil Down losgelassen
+            if (e.keyCode==66){KEY_B=false;} //B losgelassen
+            if (e.keyCode==70){KEY_F=false;} //F losgelassen
+            if (e.keyCode==83){KEY_S=false;} //S losgelassen
+            
+            if (e.keyCode==81){KEY_Q=false;} //Q losgelassen
         }
+        
+        function adjustSpeed(increment){
+            rocket.speed = limit(rocket.speed + increment, 4 , 15);
+        };
 
         function startGame(){
 
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
             document.getElementById("GameStart").style.visibility = 'hidden';
-            playsound('sounds/backgroundsound.mp3', 0.75);
-
-            loadImages();
-            //console.log("lives " + rocket.lifes);
            
+            playsound('sounds/backgroundsound.mp3', 0.75);
+            
+            //LevelChange();
+            //console.log("lives " + rocket.lifes);
+            
+            rocket.gun1=guns[0];
+            //rocket.gun2=guns[0];
             setInterval(update, 1000/50 );
             setInterval(shooting, 1000/50 );
-            setInterval(createUfos,1000/20 );
+            setInterval(createObjects,1000/20 );
             setInterval(checkColision, 10);
 
             
@@ -145,12 +334,25 @@
                         
                 if (collision(rocket, ufo)){
                     console.log("rocketHitUfo ")
+                    let lifes =  rocket.lifes; 
+                    //ufo.power = Math.trunc((rocket.power * 100  - rocket.shield)/100);
                    rocket.lifes -= ufo.power;
-                   ufo.power -= rocket.shield;
-                   playsound('sounds/ShipHit.wav', 1);
+                   ufo.power -= lifes;
+                   
+                   playsound('sounds/ShipHit.mp3', 1);
                     if (rocket.lifes <=0){
                         rocket.img.src = 'img/shit.png';
                         playsound('sounds/ShipDestroyed.mp3', 1);
+                        gameInfo.time = 5000;
+                         gameInfo.rem = 5000;
+                        gameInfo.text = " Game over";
+                        gameInfo.fillColor = 'red';
+                        gameInfo.borderColor = 'red';
+                        gameInfo.font = '200px Arial bold';
+                        gameInfo.horizontAlign = 'center';
+                        gameInfo.textBaseline = 'middle';
+                        gameInfo.x = CWIDTH/2;
+                        gameInfo.y = CHEIGHT/2; 
                           
                     };
                     
@@ -159,114 +361,351 @@
                 };
                 shots.forEach(function(shot){
                     if (collision(ufo,shot)){
-                        console.log("shotHitUfo ")   
-                        ufo.lifes -= 1;
+                        let lifes = ufo.lifes
+                       // console.log("shotHitUfo Ufolifes" + ufo.lifes + "shotPower " + shot.power); 
+                       shot.power = shot.power ;
+                        ufo.lifes -= shot.power;
                         playsound(ufo.hitsound, 1);
-                        hitcounter += 1;
-                        ufos = ufos.filter(u=> u !=ufo);   
-                        shot.power -= 1;
+                         
+                        shot.power -= lifes;
                         if (ufo.lifes <= 0){
+                            if (ufo.type == 'endboss'){
+                               
+                                eb -= 1;
+                                if (eb ==0){
+                                    rocket.level += 1;
+                                    shots.length = 0;
+                                };
+                                
+                            }
+                           // if (hitcounter>levels[rocket.level].hitsrequired){rocket.level +=1 };
+
                             playsound(ufo.destsound, 1);
-                            ufos = ufos.filter(u=> u != ufo);};
+
+                            hitcounter += ufo.points;
+                            scoreadd.score = ufo.points;
+                            scoreadd.time = 3000;
+                            ufos = ufos.filter(u=> u != ufo);
+                            
+                        };
                         
                              // cause damage to UFO
                             
-                        if (shot.power <= 0){shots.filter(i=> i != shot);};  // deduct power from shot 
-                        
+                        if (shot.power <= 0){
+                            shots = shots.filter(i=> i != shot);};  // deduct power from shot 
+                        //console.log("shotHitUfo Ufolifes" + ufo.lifes + "shotPower " + shot.power); 
                     };
                 })
             })
             
-            console.log("hitcounter " + hitcounter     ) 
+            shots.forEach(function(shot){
+                    if (collision(rocket,shot)){
+                        rocket.lifes -= shot.power;
+
+                        
+                        
+                        playsound('sounds/ShipHit.mp3', 1);
+                        if (rocket.lifes <=0){
+                            rocket.img.src = 'img/shit.png';
+                            playsound('sounds/ShipDestroyed.mp3', 1);
+                            
+                        };
+                        if (shot.power <= 0){
+                                shots = shots.filter(i=> i != shot);
+                        };
+                    
+                };
+            });
         }
 
-        function update(){
-            if (rocket.lifes>0){
+        function update(){//call every 50 milliseconds
+            if (scoreadd.time > 0){
+                scoreadd.time -= 50;};
+            if (scoreadd.time <= 0){
+                scoreadd.time = 0;
+                scoreadd.score = 0;};
+            if (gameInfo.rem > 0){
+                gameInfo.rem -= 50;
+                 };
+            if (gameInfo.rem <= 0){
+                gameInfo.rem = 0;}
             
+            if (rocket.lifes>0){
+                if (hitcounter>=levels[rocket.level].hitsrequired && eb==0){
+                    createEB = true;
+                };
+
+                if (KEY_F &&  !Fpressed){
+                     adjustSpeed(1);
+                };
+                if (KEY_S &&  !Spressed){
+                     adjustSpeed(-1);
+                };
+                Spressed = KEY_S;
+                Fpressed = KEY_F;
+
+                if (rocket.level>level){LevelChange();};
+                level = rocket.level ;
+
                 if (KEY_UP &&  (rocket.y > 0)){
-                    rocket.y -= 7;
+                    rocket.y -= rocket.speed;
                 };
                 if (KEY_DOWN && (rocket.y < CHEIGHT-rocket.height)){
-                    rocket.y += 7;
+                    rocket.y += rocket.speed;
                 };   
 
                 shots.forEach(function(shot){
-                    shot.x +=15;
-                    if (shot.x > CWIDTH){shots.filter(u=> u !=shot);}; 
+                    shot.x +=shot.speed;
+                    //if (shot.x > CWIDTH  || shot.x < (0- shot.pwidth)){shots.filter(u=> u !=shot);}; 
                 })
 
+               
+            
                 ufos.forEach(function(ufo){
-                    ufo.x -= ufo.speed;
+                    if (ufo.type == 'ufo'){
+                    ufo.x -= ufo.speed;};
+
+                    if (ufo.type == 'endboss'){
+
+                        if (ufo.y <= 50 ) {
+                            ufo.speed = endbossspeed;
+                        };
+                            if (ufo.y > CHEIGHT - ufo.height){
+                                ufo.speed = - 1* endbossspeed;
+                            };
+                        ufo.y += ufo.speed;
+                        ufoshoot();
+                
+                    };
+                    
+
                     if (ufo.x <= - ufo.width){ufos = ufos.filter(u=> u !=ufo);};              
                 });
 
+            document.getElementById('cLife').innerHTML = rocket.lifes ;
+           // document.getElementById('cShield').innerHTML = rocket.shield ;
+            document.getElementById('cPower').innerHTML = rocket.poweradd + guns[0].power ;
+            document.getElementById('cSpeed').innerHTML = rocket.speed ;
+            if (rocket.gun2!=null){
+                document.getElementById('cGuns').innerHTML = rocket.gun1.type + ", " + rocket.gun2.type}
+            document.getElementById('cGuns').innerHTML =  rocket.gun1.type  ;
+            document.getElementById('cHits').innerHTML = hitcounter ;
+            document.getElementById('cLevel').innerHTML = rocket.level ;
+            document.getElementById('cHitsReq').innerHTML = levels[rocket.level].hitsrequired - hitcounter;
                 
 
                 
             return null;}
         }
 
-        function createUfos(){//call every 50 milliseconds   
-            if (rocket.lifes>0){
+        function ufoshoot(){
+            
+            ufos.filter(u => u.type == "endboss").forEach(function(boss){ //(let i = 1; i<=eb; 1++){
+               if (getRandomInt(1000) < rocket.level*15){
+                   
+                let shot = {x:0,
+                    y:0 ,
+                    width:guns[2].width,
+                    height:guns[2].height,
+                    pwidth:guns[2].pwidth,
+                    pheight:guns[2].pheight,
+                    py:0,
+                    speed :  guns[2].speed,
+                    power : rocket.level - 1 + guns[2].power,    
+                    shotsound : guns[2].shotsound,
+                    src: guns[2].src,
+                    img: new Image()};
+                    
+                    shot.x = boss.x - 5 - boss.width;
+                    shot.y = boss.y + (boss.height/2) - (shot.height/2) ;
+                    shot.py = boss.y + (boss.height/2) - (shot.pheight/2);
+                    
+                    shot.img.src=shot.src;
+                    shots.push(shot);
+                    playsound(shot.shotsound, 0.55);
+            };
+            });
+            
+        };
+
+        function createObjects(){//call every 50 milliseconds   
+            if (rocket.lifes>0 ){
                 if (ufos.length == 0 ){ufoInterval = 1};
-                if (ufos.length != 0 ){ufoInterval = 30 - getRandomInt(level * 2*10) };
+                if (ufos.length != 0 ){ufoInterval = 30 - getRandomInt(level * 4) };
                 //console.log("ufoIntervall " + ufoInterval);
                 //console.log("ufos count " + ufos.length);
                 ufoIntervalCount += 1;
-
-                if (ufoIntervalCount>=ufoInterval){
+                let ufoType;
+                let killpoints;
+                let spawnx;
+                let speed ;
+                let volume;
+                if (ufoIntervalCount>=ufoInterval || createEB){
                     ufoIntervalCount = 0;
-                    
-                    let ufoType = getRandomInt(4);
-                    let ufo ={
-                        x : CWIDTH + flyObjects[ufoType].width,
-                        y : getRandomInt(CHEIGHT) ,
-                        width : flyObjects[ufoType].width,
-                        height : flyObjects[ufoType].height,
-                        lifes : flyObjects[ufoType].lifes,
-                        power : flyObjects[ufoType].power,
-                        speed : flyObjects[ufoType].speed * (1 + getRandomInt(0.2)),
-                        src : flyObjects[ufoType].src,
-                        appsound : flyObjects[ufoType].appsound,
-                        destsound: flyObjects[ufoType].destsound,
-                        hitsound : flyObjects[ufoType].hitsound,
-                        img: new Image()
+                    if(!(createEB || eb!=0)){
+                        ufoType = limit(getRandomInt(rocket.level+1),0,MAXOBJ); 
+                        let random = getRandomInt(2*level+1);
+                        speed = Math.floor(flyObjects[ufoType].speed + random  );
+                        killpoints = flyObjects[ufoType].points +  limit(Math.floor((speed - flyObjects[ufoType].speed ),0,1000000));
+                        spawnx = CWIDTH + flyObjects[ufoType].width;
+                        volume = 0.2;
+                        console.log("basespeed " + flyObjects[ufoType].speed + " random " + random +  " resultspeed " + speed + " points " +killpoints );
+                        let ufo ={
+                            x : spawnx,
+                            y : getRandomInt(CHEIGHT - flyObjects[ufoType].height)  ,
+                            type: flyObjects[ufoType].type,
+                            width : flyObjects[ufoType].width,
+                            height : flyObjects[ufoType].height,
+                            lifes : flyObjects[ufoType].lifes + ( eb * rocket.level),
+                            power : flyObjects[ufoType].power,
+                            speed : speed,
+                            points : killpoints ,
+                            src : flyObjects[ufoType].src,
+                            appsound : flyObjects[ufoType].appsound,
+                            destsound: flyObjects[ufoType].destsound,
+                            hitsound : flyObjects[ufoType].hitsound,
+                            img: new Image()
+                        };
+                        if (ufoType){
+                        
+
+                        
+                        console.log("ufoType: "+ ufo.type + " spawnx " + spawnx + " spawny " + ufo.y );
+
+                        ufo.img.src = ufo.src; 
+                        playsound(ufo.appsound, volume);
+                        ufos.push(ufo); // ufo erzeugen
                     };
-                    //console.log("ufoType: "+ufoType+" speed " + ufo.speed);
+                    };
+                    if (createEB) {
+                        // alle ufos rausfiltern, 
+                        ufos = ufos.filter(u => u.type != "ufo");
+                        //endboss einfügen
+                        // in update endboss in x fliegen lassen statt y
+                         ufoType = levels[rocket.level].eb;
 
-                    ufo.img.src = ufo.src; 
-                    playsound(ufo.appsound, 0.3);
-                    ufos.push(ufo); // ufo erzeugen
+                         killpoints = flyObjects[levels[rocket.level].eb].points ;
+                         speed = flyObjects[levels[rocket.level].eb].speed;
+                         spawnx = CWIDTH - flyObjects[levels[rocket.level].eb].width - 100;
+                         
+                         eb += 1;
+                         volume = 1;
+                         
+                         let ufo ={
+                            x : spawnx,
+                            y : getRandomInt(CHEIGHT - flyObjects[ufoType].height)  ,
+                            type: flyObjects[ufoType].type,
+                            width : flyObjects[ufoType].width,
+                            height : flyObjects[ufoType].height,
+                            lifes : flyObjects[ufoType].lifes + ( eb * rocket.level),
+                            power : flyObjects[ufoType].power,
+                            speed : speed,
+                            points : killpoints ,
+                            src : flyObjects[ufoType].src,
+                            appsound : flyObjects[ufoType].appsound,
+                            destsound: flyObjects[ufoType].destsound,
+                            hitsound : flyObjects[ufoType].hitsound,
+                            img: new Image()
+                        };
+                        endbossspeed = ufo.speed;
+
+                        if (eb>=levels[rocket.level].ebcount){createEB = false;};
+
+                        if (ufoType){
+                        
+
+                        
+                        console.log("ufoType: "+ ufo.type + " spawnx " + spawnx + " spawny " + ufo.y );
+
+                        ufo.img.src = ufo.src; 
+                        playsound(ufo.appsound, volume);
+                        ufos.push(ufo); // ufo erzeugen
+                    };
+                    };
+
                 };
-            return null;}
-        }
-        function shooting(){
-            let shot = {
-            x:rocket.x+rocket.width,
-            y:rocket.y+(rocket.height/2),
-            width:10,
-            height:6,
-            lifes:1,
-            power : rocket.power,
-            shotsound : rocket.shotsound,
-            src: 'img/zap.png',
-            img: new Image()
+            
             };
+        }
+        
 
-
+        function limit(value, min, max){
+            let val = value;
+            if (val<min){val = min;};
+            if (val>max){val = max;};
+            
+            return val;
+        }
+        
+        function shooting(){
             if (KEY_SPACE  && !shotfired){
+                let shot = {x:0,
+                y:0,
+                width:guns[0].width,
+                height:guns[0].height,
+                pwidth:guns[0].pwidth,
+                pheight:guns[0].pheight,
+                py:0,
+                speed :  guns[0].speed,
+                power : rocket.poweradd + rocket.gun1.power,
+                shotsound : guns[0].shotsound,
+                src: guns[0].src,
+                img: new Image()};
+                
+                shot.x = rocket.x + rocket.width;
+                shot.y = rocket.y + (rocket.height/2) - (shot.height/2) ;
+                shot.py = rocket.y + (rocket.height/2) - (shot.pheight/2);
+                
                 shot.img.src=shot.src;
                 shots.push(shot);
-                playsound(shot.shotsound, 0.75);
+                playsound(shot.shotsound, 0.55);
+              }; 
+              if (KEY_B  && !shotfired){
+                let shot = {x:0,
+                y:0,
+                width:rocket.gun2.width,
+                height:rocket.gun2.height,
+                pwidth:rocket.gun2.pwidth,
+                pheight:rocket.gun2.pheight,
+                py:0,
+                speed :  rocket.gun2.speed,
+                power : rocket.poweradd + rocket.gun2.power,
+                shotsound : rocket.gun2.shotsound,
+                src: rocket.gun2.src,
+                img: new Image()};
+                
+                shot.x = rocket.x + rocket.width;
+                shot.y = rocket.y + (rocket.height/2) - (shot.height/2) ;
+                shot.py = rocket.y + (rocket.height/2) - (shot.pheight/2);
+                
+                shot.img.src=shot.src;
+                shots.push(shot);
+                playsound(shot.shotsound, 0.55);
               };      
-            shotfired = KEY_SPACE;
-            };
+            shotfired = KEY_SPACE || KEY_B;
+        };
 
-        function loadImages(){
-            backgroundImage.src='img/background.png';
-            
+        function LevelChange(){
+            backgroundImage.src=levels[rocket.level-1].backgr;
+            playsound('sounds/LevelUp.mp3', 0.5);
+            rocket.src = levels[rocket.level-1].src;
+            rocket.shield += levels[rocket.level-1].shieldadd;
+            rocket.poweradd += levels[rocket.level-1].poweradd;
+            rocket.lifes += levels[rocket.level-1].lifeadd;
             rocket.img=new Image();
             rocket.img.src=rocket.src;
+            gameInfo.time = 5000;
+            gameInfo.rem = 5000;
+            gameInfo.text = "Level " + rocket.level;
+            gameInfo.fillColor = 'yellow';
+            gameInfo.borderColor = 'red';
+            gameInfo.font = '300px Arial bold';
+            gameInfo.horizontAlign = 'left';
+            gameInfo.textBaseline = 'middle';
+            gameInfo.x = (150);
+            gameInfo.y = CHEIGHT/2;
+
+
         }
 
         function collision(o1, o2){
@@ -286,49 +725,167 @@
 
             audio.volume = volume;
             audio.play();}
+        
+        function createHS(){
+            
+            
+
+            const tabelle = document.getElementById('score');	  
+            // schreibe Tabellenzeile
+            for (var r = 1; r <= l; r++){
+                const reihe = tabelle.insertRow(0);
+                for (var i = 1; i <= 3; i++) {
+                    let inhalt = hsdata[r,i],
+                        zelle = reihe.insertCell();
+                    zelle.innerHTML = inhalt;	 
+                }
+            }
+           
+        }
+
         function draw(){
             ctx.drawImage(backgroundImage, 0, 0, CWIDTH,CHEIGHT);
             ctx.drawImage(rocket.img, rocket.x, rocket.y, rocket.width, rocket.height);
+            
+            ctx.fillStyle = 'red';
+            ctx.font = '30px Arial bold ';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Level: ' + rocket.level, 10, 30);
+
+
+            ctx.fillStyle = 'yellow';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Score: ' + hitcounter, 150, 30);
+
+            if (scoreadd.score > 0){
+            ctx.fillStyle = 'red';
+            ctx.strokeStyle = 'yellow';
+            ctx.font = '50px Arial bold ';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+ ' + scoreadd.score, 300, scoreadd.time/100);
+            ctx.strokeText('+ ' + scoreadd.score, 300, scoreadd.time/100);
+            }
+
+            if (gameInfo.rem > 0){
+            ctx.fillStyle =  gameInfo.fillColor;
+            ctx.strokeStyle =   gameInfo.borderColor;
+            ctx.font =  gameInfo.font;
+            ctx.textAlign =  gameInfo.horizontAlign;
+            ctx.textBaseline =  gameInfo.textBaseline;
+            ctx.fillText( gameInfo.text,  gameInfo.x,   gameInfo.y * ( gameInfo.rem / gameInfo.time));
+            ctx.strokeText( gameInfo.text,  gameInfo.x,   gameInfo.y * ( gameInfo.rem / gameInfo.time));
+            }
+            
+            ufos.filter(u => u.type == "endboss").forEach(function(boss){
+                ctx.fillStyle =  'red';
+                ctx.strokeStyle = 'yellow'
+                ctx.font =  '30px Arial ';
+                ctx.textAlign =  'left';
+                ctx.textBaseline =  'middle';
+                ctx.fillText( boss.lifes ,  boss.x-60,   boss.y+  boss.height/2);
+                ctx.strokeText( boss.lifes  ,  boss.x-60,   boss.y+  boss.height/2);
+            });
 
             ufos.forEach(function(ufo){
-                ctx.drawImage(ufo.img, ufo.x, ufo.y, ufo.width, ufo.height);   
+                ctx.drawImage(ufo.img, ufo.x, ufo.y, ufo.width, ufo.height);  
+                if (KEY_Q) {
+                        ctx.fillStyle =  'red';
+                        ctx.strokeStyle = 'yellow'
+                        ctx.font =  '20px Arial ';
+                        ctx.textAlign =  'left';
+                        ctx.textBaseline =  'middle';
+                        ctx.fillText( "x " + ufo.x ,  ufo.x,   ufo.y+  00);
+                        ctx.fillText( "y " + ufo.y ,  ufo.x,   ufo.y+  20);
+                        ctx.fillText( "s " + ufo.speed ,  ufo.x,   ufo.y+  40);
+                        ctx.fillText( "bs " + ufo.type ,  ufo.x,   ufo.y+  60);
+                        ctx.strokeText( "x " + ufo.x ,  ufo.x,   ufo.y+  00);
+                        ctx.strokeText( "y " + ufo.y ,  ufo.x,   ufo.y+  20);
+                        ctx.strokeText( "s " + ufo.speed ,  ufo.x,   ufo.y+  40);
+                        ctx.strokeText( "bs " + ufo.type ,  ufo.x,   ufo.y+  60);
+                        
+                        }; 
             });
             shots.forEach(function(shot){
-                ctx.drawImage(shot.img, shot.x, shot.y, shot.width*10, shot.height*10)
+                ctx.drawImage(shot.img, shot.x, shot.py, shot.pwidth, shot.pheight)
             });
             requestAnimationFrame(draw);
         }
 
+  
     </script>
 </head>
-<body > <!--onload="startGame()">-->
-    
+<body  > <!-- </body>onload="createHS()">-->
 
+    
     <button type="button" id = "GameStart" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
         StartGame
-      </button>
+      </button><br>
+
 
     <canvas id="canvas" width="1200" height="800"></canvas>
-
+    <div id="highscore"> 
+        <table id="score" class="mdl-data-table mdl-js-data-table mdl-data-table- mdl-0dp">
+            <caption>
+                <h4>Highscore</h4>
+                
+             </caption>
+            <thead>
+                
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Score</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- <tr id=>
+                <td id="cLife"></td>
+                <td id="cShield"></td>
+                <td id="cPower"></td>
+                <td id="cSpeed"></td>
+                <td id="cGuns"></td>
+                <td id="cHits"></td>
+                <td id="cLevel"></td>
+                <td id="cHitsReq"></td>
+            </tr>-->
+            
+            </tbody>
+        </table>
+     </div><br>
+     
     <table class="mdl-data-table mdl-js-data-table mdl-data-table- mdl-shadow--0dp">
         <thead>
           <tr>
             <th>Life</th>
-            <th>Shield</th>
-            <th>Hits</th>
+            <!--<th>Shield</th>-->
+            <th>Power</th>
+            <th>Speed</th>
+            <th>Guns</th>
+            <th>Score</th>
             <th>Level</th>
-            <th>Hits to next Level</th>
+            <th>Score to <br>next Level</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td >level</td>
-            <td>25</td>
-            <td>$2.90</td>
+            <td id="cLife"></td>
+           <!-- <td id="cShield"></td>-->
+            <td id="cPower"></td>
+            <td id="cSpeed"></td>
+            <td id="cGuns"></td>
+            <td id="cHits"></td>
+            <td id="cLevel"></td>
+            <td id="cHitsReq"></td>
           </tr>
           
         </tbody>
       </table>
+      <div> Press F to increase ship speed, press S to reduce ship speed </div>
 
 </body>
 </html>
