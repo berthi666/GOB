@@ -543,7 +543,7 @@
                 if (ufoIntervalCount>=ufoInterval || createEB){
                     ufoIntervalCount = 0;
                     if(!(createEB || eb!=0)){
-                        ufoType = limit(getRandomInt(rocket.level+1),0,MAXOBJ); 
+                        ufoType = limit(getRandomInt(rocket.level),0,MAXOBJ); 
                         let random = getRandomInt(2*level+1);
                         speed = Math.floor(flyObjects[ufoType].speed + random  );
                         killpoints = flyObjects[ufoType].points +  limit(Math.floor((speed - flyObjects[ufoType].speed ),0,1000000));
@@ -566,7 +566,7 @@
                             hitsound : flyObjects[ufoType].hitsound,
                             img: new Image()
                         };
-                        if (ufoType){
+                       
                         
 
                         
@@ -575,7 +575,7 @@
                         ufo.img.src = ufo.src; 
                         playsound(ufo.appsound, volume);
                         ufos.push(ufo); // ufo erzeugen
-                    };
+                    
                     };
                     if (createEB) {
                         // alle ufos rausfiltern, 
