@@ -17,8 +17,8 @@ let backgroundImage = new Image();
 let bgAudio;
 bgAudio = new Audio('../sounds/backgroundsound.mp3');
 let shit = new Image();
-//const CWIDTH = 1280;
-//const CHEIGHT = 800; 
+const CWIDTH = 1280;
+const CHEIGHT = 800; 
 
 let shotfired =false;
 window.hitcounter = 0;
@@ -107,7 +107,7 @@ let levels = [
     {lifeadd:1,
     shieldadd:5,
     poweradd:1,
-    baseshield:50,
+    baseshield:5,
     backgr: '../img/background.png',
     hitsrequired:10,
     eb:'1',
@@ -119,7 +119,7 @@ let levels = [
     poweradd:0,
     baseshield:5,
     backgr: '../img/background.png',
-    hitsrequired:200,
+    hitsrequired:20,
     eb:'1',
     ebcount : 1,
     src: '../img/ship2.png'},
@@ -129,7 +129,7 @@ let levels = [
     poweradd:0,
     baseshield:10,
     backgr: '../img/background.png',
-    hitsrequired:500,
+    hitsrequired:50,
     eb:'1',
     ebcount : 1,
     src: '../img/ship2.png'}
@@ -741,7 +741,7 @@ function createObjects(){//call every 50 milliseconds
             if(!(createEB || eb!=0)){
                 var opponents = flyObjects.filter(u => u.type == "ufo")
                 ufoType = limit(getRandomInt(rocket.level),0,opponents.length); 
-                console.log("ufotyp: " + ufoType +  " opponentlength " + opponents.length  )
+                console.log("ufotyp: " + ufoType +  " opponentlength " +opponents.length  )
                 var random = getRandomInt(2*level+1);
                 speed = Math.floor(opponents[ufoType].speed + random  );
                 //console.log("heightpoints")
@@ -1339,10 +1339,10 @@ function createHS(){
     
     
 
-    //const tabelle = document.getElementById('score');	  
+    const tabelle = document.getElementById('score');	  
     // schreibe Tabellenzeile
     for (var r = 1; r <= l; r++){
-        //const reihe = tabelle.insertRow(0);
+        const reihe = tabelle.insertRow(0);
         for (var i = 1; i <= 3; i++) {
             let inhalt = hsdata[r,i],
                 zelle = reihe.insertCell();
