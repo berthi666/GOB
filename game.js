@@ -18,7 +18,7 @@ let bgAudio;
 bgAudio = new Audio('../sounds/backgroundsound.mp3');
 let shit = new Image();
 const CWIDTH = 1280;
-const CHEIGHT = 800; 
+const CHEIGHT = 700; 
 
 let shotfired =false;
 window.hitcounter = 0;
