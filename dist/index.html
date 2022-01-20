@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of beans</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    <script>
+        let canvas;
+        let ctx ;
+        let backgroundImage = new Image();
+        backgroundImage.src = '../img/background.png';
+        let Speed = new Image();
+        let Power = new Image();
+        let Gun = new Image();
+        let Life = new Image();
+        let Shield = new Image();
+        let Rocket = new Image();
+        Speed.src='../img/speed.png'
+        Power.src='../img/power.png'
+        Gun.src='../img/present.png'
+        Life.src='../img/sugar.png'
+        Shield.src='../img/EinSchild.png'
+        Rocket.src='../img/Ship1.png'
+      function intro(){    
+
+
+        canvas = document.getElementById('canvas');
+        var CWIDTH = canvas.width
+        var CHEIGHT =canvas.height
+        console.log(CWIDTH)
+        console.log(CHEIGHT)
+        
+
+        ctx = canvas.getContext('2d');
+        ctx.drawImage(backgroundImage, 0, 0, CWIDTH,CHEIGHT);
+
+        let i = 1;
+        let xshift = 200;
+        let yshift = 110;
+        let lineheight = 25;
+        let hadd =50;
+
+        ctx.fillStyle =  'red';
+        ctx.strokeStyle = 'yellow'
+        ctx.font =  'bold 40px Arial ';
+        ctx.textAlign =  'center';
+        ctx.textBaseline =  'middle';
+        ctx.fillText( 'Welcome to this awesome Game-Highlight' ,  CWIDTH/2,   40);
+        ctx.strokeText( 'Welcome to this awesome Game-Highlight',  CWIDTH/2,   40);
+        ctx.font =  'bold 60px Arial ';
+        ctx.fillStyle =  'red';
+        ctx.strokeStyle = 'yellow'
+        ctx.fillText( 'Game of Beans' ,  CWIDTH/2,   110);
+        ctx.strokeText( 'Game of Beans',  CWIDTH/2,   110);
+       ctx.fillStyle = 'white';
+        ctx.strokeStyle ='darkblue'
+        ctx.font =  'bold 25px Arial ';
+        ctx.fillText( 'You are the only one, to save the word from the fliegende Untertassen' ,  CWIDTH/2,   140+ hadd);
+        ctx.strokeText( 'You are the only one, to save the word from the fliegende Untertassen',  CWIDTH/2,   140+ hadd);
+        ctx.fillText( 'and allerhand anderem Kaffeegeschirr. Don´t let those porcelains get past you!' ,  CWIDTH/2,   180+ hadd);
+        ctx.strokeText( 'and allerhand anderem Kaffeegeschirr. Don´t let those porcelains get past you!',  CWIDTH/2,   180+ hadd);
+        
+        ctx.textAlign =  'center';
+        ctx.textBaseline =  'middle';
+        ctx.font =  'bold 25px Arial ';
+        ctx.fillText( "Luckily, you will be supported by the following goodies, to improve your chances." ,  CWIDTH/2,   240+ hadd);
+        ctx.strokeText( "Luckily, you will be supported by the following goodies, to improve your chances.",  CWIDTH/2,   240+ hadd);
+        ctx.fillText( "Don´t shoot them!" ,  CWIDTH/2,   280+ hadd);
+        ctx.strokeText( "Don´t shoot them!",  CWIDTH/2,   280+ hadd);
+
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle ='darkblue'
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(' : Bonus life' , 150, 310+ hadd);
+        ctx.strokeText(' : Bonus life' , 150, 310+ hadd);
+        ctx.drawImage(Life, 60, 280+ hadd, 60,60);
+
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle ='darkblue'
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(' : Shield add (if shield is zero and a damage is taken, life is reduced)' , 150, 390+ hadd);
+        ctx.strokeText(' : Shield add (if shield is zero and a damage is taken, life is reduced)' , 150, 390+ hadd);
+        ctx.drawImage(Shield, 60, 360+ hadd, 60,60);
+
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle ='darkblue'
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(' : gun power upgrade' , 150, 470+ hadd);
+        ctx.strokeText(' : gun power upgrade' , 150, 470+ hadd);
+        ctx.drawImage(Power, 60, 440+ hadd, 60,60);
+
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle ='darkblue'
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(' : Gun 2 upgrade (enable gun 2 or add ammo)' , 150, 550+ hadd);
+        ctx.strokeText(' : Gun 2 upgrade (enable gun 2 or add ammo)' , 150, 550+ hadd);
+        ctx.drawImage(Gun, 60, 520 + hadd, 60,60);
+
+       
+            //requestAnimationFrame(intro);
+        
+    }</script>
+    
+   <!-- <script src="../game.js" defer> </script>-->
+    <script src="bundle.js" defer> </script>
+    
+    <style>
+        canvas{background-color: rgba(0, 0, 0, 0.8);}
+        #highscore {float: right; }
+    </style>
+</head>
+<body onload="intro()">
+
+
+    <canvas id="canvas" width="1200" height="700"></canvas><!---->
+
+    
+    <div> <img src= '../img/keys.png'> 
+        
+          <button onclick="window.location.href ='hs.html'; " class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" >
+        Highscore
+      </button>
+    </div>
+
+
+
+</body>
+</html>
