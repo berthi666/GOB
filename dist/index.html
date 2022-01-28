@@ -110,6 +110,23 @@
         ctx.drawImage(Gun, 60, 520 + hadd, 60,60);
 
        
+
+        ctx.rect( 50, 630, 1100, 65);   // x, y, b, h
+        ctx.fillStyle =  'red';
+        ctx.strokeStyle = 'yellow'
+        ctx.stroke();                 // Rand zeichnen
+        
+        ctx.fill();                   // Füllung zeichnen
+
+        ctx.fillStyle = 'yellow';
+        ctx.strokeStyle ='yellow'
+        ctx.font = 'bold 30px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('!!! Warning !!!   Gun 2 new key: >> X <<' , 100, 665);
+        ctx.strokeText('!!! Warning !!!   Gun 2 new key: >> X <<' , 100, 665);
+
+
             //requestAnimationFrame(intro);
         
     }</script>
